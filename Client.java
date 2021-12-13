@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -10,9 +11,9 @@ public class Client {
     public Socket s;
     public BlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
 
-    public Client(Socket s){
+    public Client(Socket s) throws IOException{
         this.s = s;
-        writingPool.submit(new SenderBroker(this.s, this.queue));
+        writingPool.submit(new ReaderBroker(this.s, this.queue));
         readingPool.submit(new SenderBroker(this.s, this.queue));
         }
     
