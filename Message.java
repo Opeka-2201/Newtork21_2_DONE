@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Message {
     public static int getType(byte[] b, int offset) {
         return (int)(b[offset]>>>4);
@@ -30,5 +33,21 @@ public class Message {
 
     public static String getTopic(byte[] stream, int offset) {
         return decodeString(stream, offset+2);  
+    }
+
+    public static String[] decodeSubscribe(byte[] packet) {
+        int rm = (int) packet[1];
+        rm -= 2;
+        int count = 0;
+        int length;
+        List<String> ls = new ArrayList<>();
+        while (rm>count){
+            length = (int)packet[count] * (2^8) + (int)packet[count];
+            ls.add(new String(packet, count + 2, count + length));
+            count += (length + 2);
+        }
+        String[] toReturn = new String[ls.size()];
+        toReturn = ls.toArray();
+        return toReturn;        
     }
 }
