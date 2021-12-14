@@ -22,14 +22,15 @@ public class SenderBroker implements Runnable{
     public void run() {
         // TODO Auto-generated method stub
         while(true)
-            if(!this.queue.isEmpty())
-                try {
-                    this.out.write(this.queue.poll());
-                } catch (IOException  e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                
+            try {
+                this.out.write(this.queue.take());
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }catch (IOException  e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
     }
-    
 }
