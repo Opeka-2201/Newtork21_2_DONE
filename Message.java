@@ -47,7 +47,7 @@ public class Message {
             count += (length + 2);
         }
         String[] toReturn = new String[ls.size()];
-        toReturn = ls.toArray();
+        toReturn = ls.toArray(new String[0]);
         return toReturn;        
     }
 }
