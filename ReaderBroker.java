@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
 
@@ -28,19 +29,43 @@ public class ReaderBroker implements Runnable {
 			s.setTcpNoDelay(true);
             byte[] stream = new byte[3000];
             length = this.in.read(stream);
-            if (Message.getType(stream, 0)!=1)
-                System.out.println("Ca marche");//TODO
+            System.out.println("length connect =" + length);
             if (!Message.checkConnect(stream))
                 System.out.println("C est casse"); //TODO
             s.setSoTimeout(Message.getKeepAlive(stream)*1000);
             this.name = Message.decodeString(stream, 12);
-            System.out.println(Message.decodeString(stream, 12));
-            byte[] test = new byte[4];
-            test[0] = (byte) 32;
-            test[1] = (byte) 2;
-            test[2] = (byte) 1;
-            test[3] = (byte) 0;           
-            this.queue.add(test);
+            this.queue.add(Message.createConnack(1, 0));
+            int count = 0;
+            int rm;
+            int type;
+            int offset;
+            String topic;
+            String content;
+            byte[] packet;
+            while(true){
+                offset = 0;
+                length = this.in.read(stream);
+                rm = Message.getRemainingLength(stream, offset);
+                packet = Arrays.copyOfRange(stream,offset,offset+rm+2);
+                while(length < rm+2){
+                    packet = Arrays.copyOfRange(stream, offset, offset + rm + 2);
+                    type = Message.getType(stream, offset);
+                    switch (type) {
+                        case 3:
+                            topic = Message.getTopic(packet, offset);
+                            Topic.publish(topic, packet);                            
+                            break;
+                        
+                        case 8:
+                            
+                        
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
             
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block

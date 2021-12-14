@@ -18,4 +18,17 @@ public class Message {
         int length = (int)stream[offset] * (2^8) + (int)stream[offset+1];
         return new String(stream, offset+2, length);  
     }
+
+    public static byte[] createConnack(int sp ,int returnCode){
+        byte[] toReturn = new byte[4];
+        toReturn[0] = (byte) 32;
+        toReturn[1] = (byte) 2;
+        toReturn[2] = (byte) sp;
+        toReturn[3] = (byte) returnCode;
+        return toReturn;
+    }
+
+    public static String getTopic(byte[] stream, int offset) {
+        return decodeString(stream, offset+2);  
+    }
 }
