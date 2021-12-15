@@ -3,6 +3,7 @@ import java.util.List;
 
 public class Message {
     public static int getType(byte[] b) {
+        System.out.println(b[0]);
         return (int)(b[0]>>>4);
         
     }
@@ -15,7 +16,7 @@ public class Message {
 
     public static int getKeepAlive(byte[] packet) {return (int)packet[10]*(2^8)+(int)packet[11];}
 
-    public static int getRemainingLength(byte[] packet) {return (int)packet[1];}
+    public static int getRemainingLength(byte[] packet, int offset) {return (int)packet[offset + 1];}
 
     public static String decodeString(byte[] packet, int offset) {
         int length = (int)packet[offset] * (2^8) + (int)packet[offset+1];

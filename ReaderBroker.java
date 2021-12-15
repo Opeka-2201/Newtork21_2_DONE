@@ -29,7 +29,7 @@ public class ReaderBroker implements Runnable {
 			s.setTcpNoDelay(true);
             byte[] stream = new byte[3000];
             length = this.in.read(stream);
-            System.out.println("length connect =" + length);
+            
             if (!Message.checkConnect(stream))
                 System.out.println("C est casse"); //TODO
             s.setSoTimeout(Message.getKeepAlive(stream)*1000);
@@ -46,26 +46,33 @@ public class ReaderBroker implements Runnable {
             while(true){
                 offset = 0;
                 length = this.in.read(stream);
-                rm = Message.getRemainingLength(stream);
-                while(length < rm+2){
-                    packet = Arrays.copyOfRange(stream, offset, offset + rm + 2);
+                int read = 0;
+                
+                while(length >read){
+                    rm = Message.getRemainingLength(stream,read);
+                    packet = Arrays.copyOfRange(stream, read, read + rm + 2);
                     type = Message.getType(packet);
+                    System.out.println("name = " + this.name + "| type =" + type);
+
                     switch (type) {
                         case 3:
                             topic = Message.getTopic(packet);
+                            System.out.println("publish received");
                             Topic.publish(topic, packet);                            
                             break;
                         
                         case 8:
+                            System.out.println("subscribe received");
                             topicLs = Message.decodeSubscribe(packet);
-                            
                             for (String c : topicLs)
                                 Topic.subscribe(c,this.queue);
                             break;
                         default:
+                            System.out.println("else received");
                             break;
                     }
 
+                    read += (rm + 2);
                 }
             }
             
