@@ -19,8 +19,7 @@ public class Message {
 
     public static String decodeString(byte[] packet, int offset) {
         int length = (int)packet[offset] * (2^8) + (int)packet[offset+1];
-        return new String(packet, offset+2, length);  
-    }
+        return new String(packet, offset+2, length);    }
 
     public static byte[] createConnack(int sp ,int returnCode){
         byte[] toReturn = new byte[4];
@@ -47,13 +46,8 @@ public class Message {
             count += (length + 2);
         }
         String[] toReturn = new String[ls.size()];
-<<<<<<< HEAD
         for (int i = 0; i<ls.size(); i++)
             toReturn[i] = ls.get(i);
         return toReturn;    
-=======
-        toReturn = ls.toArray(new String[0]);
-        return toReturn;        
->>>>>>> 419858b5128af8c0ce3f848b47bafbcd8b876ba9
     }
 }
