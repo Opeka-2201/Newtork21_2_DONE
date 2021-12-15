@@ -47,8 +47,13 @@ public class Message {
             count += (length + 2);
         }
         String[] toReturn = new String[ls.size()];
+<<<<<<< HEAD
         for (int i = 0; i<ls.size(); i++)
             toReturn[i] = ls.get(i);
         return toReturn;    
+=======
+        toReturn = ls.toArray(new String[0]);
+        return toReturn;        
+>>>>>>> 419858b5128af8c0ce3f848b47bafbcd8b876ba9
     }
 }
