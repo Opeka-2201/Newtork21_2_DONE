@@ -15,77 +15,105 @@ public class ReaderBroker implements Runnable {
     Socket s;
     BlockingQueue<byte[]> queue;
     InputStream in;
+    byte[] stream;
     String name ;
+    int writedLength = 0;
+    int readerCount = 0;
+
+
     public ReaderBroker(Socket s, BlockingQueue<byte[]> q) throws IOException{
         this.queue = q;
         this.s = s;
         this.in = s.getInputStream();
+        this.stream = new byte[2000];
     }
 
     @Override
     public void run() {
-        int length = 0;
         try {
 			s.setTcpNoDelay(true);
-            byte[] stream = new byte[3000];
-            length = this.in.read(stream);
-            
-            if (!Message.checkConnect(stream))
-                System.out.println("C est casse"); //TODO
-            s.setSoTimeout(Message.getKeepAlive(stream)*1000);
-            this.name = Message.decodeString(stream, 12);
-            this.queue.add(Message.createConnack(1, 0));
-            int count = 0;
-            int rm;
             int type;
-            int offset;
             String topic;
-            String content;
-            byte[] packet;
-            String[] topicLs;
+            String[] topicArray = null;
+            byte[] packet= null;
             while(true){
-                offset = 0;
-                length = this.in.read(stream);
-                int read = 0;
-                
-                while(length >read){
-                    rm = Message.getRemainingLength(stream,read);
-                    packet = Arrays.copyOfRange(stream, read, read + rm + 2);
-                    type = Message.getType(packet);
-                    System.out.println("name = " + this.name + "| type =" + type);
+                packet = read();
+                //System.out.println(Integer.toHexString((int)packet[0]));
+                type = Message.getType(packet);
+                System.out.println(type);
+                switch (type) {
+                    case 1:
+                        if (!Message.checkConnect(packet))
+                            System.out.println("C est casse"); // TODO
+                        s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
+                        this.name = Message.decodeString(packet, 12);
+                        this.queue.add(Message.createConnack(1, 0));
+                        System.out.println(this.name + ": conncected");
+                        break;
 
-                    switch (type) {
-                        case 3:
-                            topic = Message.getTopic(packet);
-                            System.out.println("publish received");
-                            Topic.publish(topic, packet);                            
-                            break;
-                        
-                        case 8:
-                            System.out.println("subscribe received");
-                            topicLs = Message.decodeSubscribe(packet);
-                            for (String c : topicLs)
-                                Topic.subscribe(c,this.queue);
-                            break;
-                        default:
-                            System.out.println("else received");
-                            break;
-                    }
+                    case 3:
+                        topic = Message.getTopic(packet);
+                        System.out.println("    Publish received");
+                        Topic.publish(topic, packet);                            
+                        break;
 
-                    read += (rm + 2);
+                    
+                    case 8:
+                        System.out.println("  Subscribe received");
+                        byte[] subId = Message.getSubscribeID(packet);
+                        topicArray = Message.decodeSubscribe(packet);
+                        int [] listQoS = Message.getQoS(packet);
+                        for (String c : topicArray)
+                            Topic.subscribe(c,this.queue);
+                        this.queue.add(Message.createSuback(subId,listQoS));
+                        System.out.println("  SUBACK send");
+                        break;
+                    
+                    case 12:
+                        System.out.println("PingReq received");
+                        this.queue.add(Message.createPingResp());
+                        System.out.println("PingResp received");
+
+                        break;
+                    default:
+                        System.out.println("else received");
+                        break;
                 }
             }
             
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
+		}        
+    }
+
+    public byte[] read()
+    {  
+        int[] rm;
+        int msgLength;
+        byte[] packet = null;
+        boolean end = false;
+        int writed = 0;
+        int received = 0;
+        try {
+            received = this.in.read(this.stream);
+            rm = Message.getRemainingLength(this.stream,0);
+            msgLength = rm[0] + rm[1] + 1;
+            packet = new byte[msgLength];
+            while (!end){
+                for(int i = 0; i < received ; i++)
+                    packet[writed+ i] = this.stream[i];
+                writed += received;
+                //System.out.println("msg = "+ msgLength +" writed= "+ writed);
+                if (msgLength == writed)
+                    end = true;
+                else
+                    received = this.in.read(this.stream);
+            }
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        
-
-        
+        return packet;
     }
 }
