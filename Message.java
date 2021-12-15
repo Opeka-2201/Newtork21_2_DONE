@@ -2,24 +2,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Message {
-    public static int getType(byte[] b, int offset) {
-        return (int)(b[offset]>>>4);
+    public static int getType(byte[] b) {
+        return (int)(b[0]>>>4);
         
     }
 
-    public static boolean checkConnect(byte[] stream) {
-        if(stream[0]!=16 || stream[2]!=0 || stream[3]!=4 || stream[4]!=77 || stream[5]!=81 || stream[6] != 84|| stream[7]!=84 || stream[8]!=4)
+    public static boolean checkConnect(byte[] packet) {
+        if(packet[0]!=16 || packet[2]!=0 || packet[3]!=4 || packet[4]!=77 || packet[5]!=81 || packet[6] != 84|| packet[7]!=84 || packet[8]!=4)
             return false;
         return true;
     }
 
-    public static int getKeepAlive(byte[] stream) {return (int)stream[10]*(2^8)+(int)stream[11];}
+    public static int getKeepAlive(byte[] packet) {return (int)packet[10]*(2^8)+(int)packet[11];}
 
-    public static int getRemainingLength(byte[] stream, int offset) {return (int)stream[offset+1];}
+    public static int getRemainingLength(byte[] packet) {return (int)packet[1];}
 
-    public static String decodeString(byte[] stream, int offset) {
-        int length = (int)stream[offset] * (2^8) + (int)stream[offset+1];
-        return new String(stream, offset+2, length);  
+    public static String decodeString(byte[] packet, int offset) {
+        int length = (int)packet[offset] * (2^8) + (int)packet[offset+1];
+        return new String(packet, offset+2, length);  
     }
 
     public static byte[] createConnack(int sp ,int returnCode){
@@ -31,8 +31,8 @@ public class Message {
         return toReturn;
     }
 
-    public static String getTopic(byte[] stream, int offset) {
-        return decodeString(stream, offset+2);  
+    public static String getTopic(byte[] packet) {
+        return decodeString(packet,2);  
     }
 
     public static String[] decodeSubscribe(byte[] packet) {
@@ -40,14 +40,15 @@ public class Message {
         rm -= 2;
         int count = 0;
         int length;
-        List<String> ls = new ArrayList<>();
+        ArrayList<String> ls = new ArrayList<>();
         while (rm>count){
             length = (int)packet[count] * (2^8) + (int)packet[count];
             ls.add(new String(packet, count + 2, count + length));
             count += (length + 2);
         }
         String[] toReturn = new String[ls.size()];
-        toReturn = ls.toArray();
-        return toReturn;        
+        for (int i = 0; i<ls.size(); i++)
+            toReturn[i] = ls.get(i);
+        return toReturn;    
     }
 }

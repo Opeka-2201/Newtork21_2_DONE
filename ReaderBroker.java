@@ -42,23 +42,25 @@ public class ReaderBroker implements Runnable {
             String topic;
             String content;
             byte[] packet;
+            String[] topicLs;
             while(true){
                 offset = 0;
                 length = this.in.read(stream);
-                rm = Message.getRemainingLength(stream, offset);
-                packet = Arrays.copyOfRange(stream,offset,offset+rm+2);
+                rm = Message.getRemainingLength(stream);
                 while(length < rm+2){
                     packet = Arrays.copyOfRange(stream, offset, offset + rm + 2);
-                    type = Message.getType(stream, offset);
+                    type = Message.getType(packet);
                     switch (type) {
                         case 3:
-                            topic = Message.getTopic(packet, offset);
+                            topic = Message.getTopic(packet);
                             Topic.publish(topic, packet);                            
                             break;
                         
                         case 8:
+                            topicLs = Message.decodeSubscribe(packet);
                             
-                        
+                            for (String c : topicLs)
+                                Topic.subscribe(c,this.queue);
                             break;
                         default:
                             break;
