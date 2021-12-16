@@ -11,10 +11,13 @@ public class SenderBroker implements Runnable{
     Socket s;
     BlockingQueue<byte[]> queue;
     OutputStream out;
+    Client client;
 
-    public SenderBroker(Socket next, BlockingQueue<byte[]> queue) throws IOException {
-        this.s = next;
-        this.queue = queue;
+    public SenderBroker(Client client) throws IOException {
+        
+        this.client = client;
+        this.s = client.s;
+        this.queue = client.queue;
         this.out = this.s.getOutputStream();
     }
 
@@ -30,14 +33,17 @@ public class SenderBroker implements Runnable{
                     e.printStackTrace();
                     System.exit(-1);
                 }
-                out.write(msg);}
+                synchronized(this){
+                out.write(msg);
+                }
+            }
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
     }
 
-    public void QUIT() {
+    public void stop() {
         Thread.currentThread().interrupt();
         
     }

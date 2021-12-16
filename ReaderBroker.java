@@ -12,6 +12,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class ReaderBroker implements Runnable {
 
+    Client client;
     Socket s;
     BlockingQueue<byte[]> queue;
     InputStream in;
@@ -23,12 +24,14 @@ public class ReaderBroker implements Runnable {
     int readerCount = 0;
 
 
-    public ReaderBroker(Socket s, BlockingQueue<byte[]> q, SenderBroker sender) throws IOException{
-        this.queue = q;
-        this.s = s;
-        this.in = s.getInputStream();
+    public ReaderBroker(Client client) throws IOException{
+        
+        
+        this.client = client;
+        this.queue = client.queue;
+        this.s = client.s;
+        this.in = this.s.getInputStream();
         this.stream = new byte[2000];
-        this.sender = sender;
         this.topicLs = new ArrayList<>();
     }
 
@@ -55,13 +58,11 @@ public class ReaderBroker implements Runnable {
 
                     case 3:
                         topic = Message.getTopic(packet);
-                        System.out.println("    Publish received");
                         Topic.publish(topic, packet);                            
                         break;
 
                     
                     case 8:
-                        System.out.println("  Subscribe received");
                         byte[] subId = Message.getSubscribeID(packet);
                         topicArray = Message.decodeSubscribe(packet);
                         int [] listQoS = Message.getQoS(packet);
@@ -71,13 +72,10 @@ public class ReaderBroker implements Runnable {
                             Topic.subscribe(c,this);
                         }
                         this.queue.add(Message.createSuback(subId,listQoS));
-                        System.out.println("  SUBACK send");
                         break;
                     
                     case 12:
-                        System.out.println("PingReq received");
                         this.queue.add(Message.createPingResp());
-                        System.out.println("PingResp received");
 
                     case 14:
                         System.out.println("Client disconnected");
@@ -85,7 +83,7 @@ public class ReaderBroker implements Runnable {
                             Topic.unSubscribe(c, this);
                             this.topicLs.remove(c);
                         }
-                        QUIT();
+                        this.client.stop();
                         
                         break;
                     default:
@@ -130,8 +128,7 @@ public class ReaderBroker implements Runnable {
         return packet;
     }
 
-    public void QUIT() {
-        this.sender.QUIT();
+    public void stop() {
         Thread.currentThread().interrupt();
     }
 }
