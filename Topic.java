@@ -9,32 +9,32 @@ import java.util.Map;
 public class Topic {
     private static Map<String, Topic> dic = new HashMap<String, Topic>();
     //private String name;
-    private List<ReaderBroker> readerLs;
+    private List<Client> clientLs;
 
     private Topic(String name){
         //this.name = name;
-        this.readerLs = new ArrayList<>();
+        this.clientLs = new ArrayList<>();
         }
 
-    public static void subscribe(String topicName, ReaderBroker reader) {
+    public static void subscribe(String topicName, Client client) {
 
         if (!dic.containsKey(topicName)) {
             dic.put(topicName, new Topic(topicName));
         }
-        dic.get(topicName).readerLs.add(reader);
+        dic.get(topicName).clientLs.add(client);
     }
 
     public static void publish(String topicName, byte[] toPublish) {
         if(dic.containsKey(topicName)){
-            List<ReaderBroker>  list = dic.get(topicName).readerLs;
-            for (ReaderBroker r : list)
-                r.client.queue.add(toPublish);
+            List<Client>  list = dic.get(topicName).clientLs;
+            for (Client c : list)
+                c.queue.add(toPublish);
         }
     }
 
-    public static void unSubscribe(String topic, ReaderBroker reader) {
+    public static void unSubscribe(String topic, Client client) {
             if (dic.containsKey(topic))
-                dic.get(topic).readerLs.remove(reader);   
+                dic.get(topic).clientLs.remove(client);   
     }
 }
 

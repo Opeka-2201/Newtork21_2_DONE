@@ -61,7 +61,7 @@ public class ReaderBroker implements Runnable {
                         for (String c : topicArray){
                             if (!this.topicLs.contains(c))
                                 this.topicLs.add(c);
-                            Topic.subscribe(c,this);
+                            Topic.subscribe(c,this.client);
                         }
                         this.client.queue.add(Message.createSuback(subId,listQoS));
                         break;
@@ -71,7 +71,7 @@ public class ReaderBroker implements Runnable {
 
                     case 14:
                         for (String c : this.topicLs){
-                            Topic.unSubscribe(c, this);
+                            Topic.unSubscribe(c, this.client);
                             this.topicLs.remove(c);
                         }
                         this.client.stop();
