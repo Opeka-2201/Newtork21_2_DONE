@@ -4,33 +4,24 @@
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
 
 
 public class ReaderBroker implements Runnable {
 
     Client client;
-    Socket s;
-    BlockingQueue<byte[]> queue;
     InputStream in;
     byte[] stream;
     String name ;
-    SenderBroker sender;
     ArrayList<String> topicLs;
-    int writedLength = 0;
-    int readerCount = 0;
 
 
     public ReaderBroker(Client client) throws IOException{
         
         
         this.client = client;
-        this.queue = client.queue;
-        this.s = client.s;
-        this.in = this.s.getInputStream();
+        this.in = this.client.s.getInputStream();
         this.stream = new byte[2000];
         this.topicLs = new ArrayList<>();
     }
@@ -38,7 +29,7 @@ public class ReaderBroker implements Runnable {
     @Override
     public void run() {
         try {
-			s.setTcpNoDelay(true);
+			this.client.s.setTcpNoDelay(true);
             int type;
             String topic;
             String[] topicArray = null;
@@ -50,10 +41,9 @@ public class ReaderBroker implements Runnable {
                     case 1:
                         if (!Message.checkConnect(packet))
                             System.out.println("C est casse"); // TODO
-                        s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
+                        this.client.s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
                         this.name = Message.decodeString(packet, 12);
-                        this.queue.add(Message.createConnack(1, 0));
-                        System.out.println(this.name + ": conncected");
+                        this.client.queue.add(Message.createConnack(1, 0));
                         break;
 
                     case 3:
@@ -71,14 +61,13 @@ public class ReaderBroker implements Runnable {
                                 this.topicLs.add(c);
                             Topic.subscribe(c,this);
                         }
-                        this.queue.add(Message.createSuback(subId,listQoS));
+                        this.client.queue.add(Message.createSuback(subId,listQoS));
                         break;
                     
                     case 12:
-                        this.queue.add(Message.createPingResp());
+                        this.client.queue.add(Message.createPingResp());
 
                     case 14:
-                        System.out.println("Client disconnected");
                         for (String c : this.topicLs){
                             Topic.unSubscribe(c, this);
                             this.topicLs.remove(c);
@@ -87,14 +76,13 @@ public class ReaderBroker implements Runnable {
                         
                         break;
                     default:
-                        System.out.println("else received");
                         break;
                 }
             }
             
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+            this.client.stop();
 		}        
     }
 
@@ -115,7 +103,6 @@ public class ReaderBroker implements Runnable {
                 for(int i = 0; i < received ; i++)
                     packet[writed+ i] = this.stream[i];
                 writed += received;
-                //System.out.println("msg = "+ msgLength +" writed= "+ writed);
                 if (msgLength == writed)
                     end = true;
                 else

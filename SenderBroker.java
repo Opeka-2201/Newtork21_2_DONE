@@ -1,5 +1,3 @@
-import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -8,33 +6,30 @@ import java.io.IOException;
  */
 public class SenderBroker implements Runnable{
 
-    Socket s;
-    BlockingQueue<byte[]> queue;
     OutputStream out;
     Client client;
+    Boolean write;
 
     public SenderBroker(Client client) throws IOException {
         
         this.client = client;
-        this.s = client.s;
-        this.queue = client.queue;
-        this.out = this.s.getOutputStream();
+        this.out = this.client.s.getOutputStream();
+        write = true;
     }
 
     @Override
     public void run() {
         try {
-            while(true){    
-                s.setTcpNoDelay(true);
+            while(write){    
                 byte[] msg = null;
                 try {
-                    msg = queue.take();
+                    msg = this.client.queue.take();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     System.exit(-1);
                 }
                 synchronized(this){
-                out.write(msg);
+                    this.out.write(msg);
                 }
             }
             } catch (IOException e) {
@@ -44,7 +39,7 @@ public class SenderBroker implements Runnable{
     }
 
     public void stop() {
+        this.write = false;
         Thread.currentThread().interrupt();
-        
     }
 }

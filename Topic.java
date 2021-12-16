@@ -28,7 +28,7 @@ public class Topic {
         if(dic.containsKey(topicName)){
             List<ReaderBroker>  list = dic.get(topicName).readerLs;
             for (ReaderBroker r : list)
-                r.queue.add(toPublish);
+                r.client.queue.add(toPublish);
         }
     }
 
