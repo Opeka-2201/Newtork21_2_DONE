@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 public class Broker {
     public static void main(String[] args) {
-       
+       boolean play = true;
         if (args.length != 1) {
             System.out.println("Broker expects : $ java Broker 2xxx (where xxx is a number in range : 2000 -> 2999)");
             System.exit(-1);
@@ -39,12 +39,13 @@ public class Broker {
         Client.init(writingPool,readingPool);
         System.out.println("Broker ready");
 
-        while (true) {
+        while (play) {
             try {
                 Socket next = server.accept();
                 new Client(next);
             } catch (IOException e) {
                 e.printStackTrace();
+                play = false;
             }
         }
     }

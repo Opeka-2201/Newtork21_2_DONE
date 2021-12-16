@@ -36,4 +36,9 @@ public class SenderBroker implements Runnable{
                 System.exit(-1);
             }
     }
+
+    public void QUIT() {
+        Thread.currentThread().interrupt();
+        
+    }
 }

@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Topic
@@ -10,28 +9,32 @@ import java.util.concurrent.BlockingQueue;
 public class Topic {
     private static Map<String, Topic> dic = new HashMap<String, Topic>();
     //private String name;
-    private List<BlockingQueue<byte[]>> queueLs;
+    private List<ReaderBroker> readerLs;
 
     private Topic(String name){
         //this.name = name;
-        this.queueLs = new ArrayList<>();
+        this.readerLs = new ArrayList<>();
         }
 
-    public static void subscribe(String topicName, BlockingQueue<byte[]> queue) {
+    public static void subscribe(String topicName, ReaderBroker reader) {
 
         if (!dic.containsKey(topicName)) {
             dic.put(topicName, new Topic(topicName));
         }
-        dic.get(topicName).queueLs.add(queue);
+        dic.get(topicName).readerLs.add(reader);
     }
 
     public static void publish(String topicName, byte[] toPublish) {
-        toPublish[1] = (byte)48;
         if(dic.containsKey(topicName)){
-            List<BlockingQueue<byte[]>>  list = dic.get(topicName).queueLs;
-            for (BlockingQueue<byte[]> q : list)
-                q.add(toPublish);
+            List<ReaderBroker>  list = dic.get(topicName).readerLs;
+            for (ReaderBroker r : list)
+                r.queue.add(toPublish);
         }
+    }
+
+    public static void unSubscribe(String topic, ReaderBroker reader) {
+            if (dic.containsKey(topic))
+                dic.get(topic).readerLs.remove(reader);   
     }
 }
 

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
 
@@ -17,15 +17,19 @@ public class ReaderBroker implements Runnable {
     InputStream in;
     byte[] stream;
     String name ;
+    SenderBroker sender;
+    ArrayList<String> topicLs;
     int writedLength = 0;
     int readerCount = 0;
 
 
-    public ReaderBroker(Socket s, BlockingQueue<byte[]> q) throws IOException{
+    public ReaderBroker(Socket s, BlockingQueue<byte[]> q, SenderBroker sender) throws IOException{
         this.queue = q;
         this.s = s;
         this.in = s.getInputStream();
         this.stream = new byte[2000];
+        this.sender = sender;
+        this.topicLs = new ArrayList<>();
     }
 
     @Override
@@ -38,9 +42,7 @@ public class ReaderBroker implements Runnable {
             byte[] packet= null;
             while(true){
                 packet = read();
-                //System.out.println(Integer.toHexString((int)packet[0]));
                 type = Message.getType(packet);
-                System.out.println(type);
                 switch (type) {
                     case 1:
                         if (!Message.checkConnect(packet))
@@ -63,8 +65,11 @@ public class ReaderBroker implements Runnable {
                         byte[] subId = Message.getSubscribeID(packet);
                         topicArray = Message.decodeSubscribe(packet);
                         int [] listQoS = Message.getQoS(packet);
-                        for (String c : topicArray)
-                            Topic.subscribe(c,this.queue);
+                        for (String c : topicArray){
+                            if (!this.topicLs.contains(c))
+                                this.topicLs.add(c);
+                            Topic.subscribe(c,this);
+                        }
                         this.queue.add(Message.createSuback(subId,listQoS));
                         System.out.println("  SUBACK send");
                         break;
@@ -74,6 +79,14 @@ public class ReaderBroker implements Runnable {
                         this.queue.add(Message.createPingResp());
                         System.out.println("PingResp received");
 
+                    case 14:
+                        System.out.println("Client disconnected");
+                        for (String c : this.topicLs){
+                            Topic.unSubscribe(c, this);
+                            this.topicLs.remove(c);
+                        }
+                        QUIT();
+                        
                         break;
                     default:
                         System.out.println("else received");
@@ -115,5 +128,10 @@ public class ReaderBroker implements Runnable {
             e.printStackTrace();
         }
         return packet;
+    }
+
+    public void QUIT() {
+        this.sender.QUIT();
+        Thread.currentThread().interrupt();
     }
 }

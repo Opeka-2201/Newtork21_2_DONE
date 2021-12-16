@@ -2,11 +2,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class Message {
+    
+    
     public static int getType(byte[] b) {
         int type = Byte.toUnsignedInt(b[0]);
-        System.out.println("Le type est :" + type);
-        return (type/16);
-        
+        return (type/16);   
     }
 
     public static boolean checkConnect(byte[] packet) {

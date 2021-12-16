@@ -13,8 +13,10 @@ public class Client {
 
     public Client(Socket s) throws IOException{
         this.s = s;
-        writingPool.submit(new ReaderBroker(this.s, this.queue));
-        readingPool.submit(new SenderBroker(this.s, this.queue));
+        SenderBroker sender = new SenderBroker(this.s, this.queue);
+        readingPool.submit(sender);
+        writingPool.submit(new ReaderBroker(this.s, this.queue, sender));
+
         }
     
     public static void init(ExecutorService w, ExecutorService r) {
