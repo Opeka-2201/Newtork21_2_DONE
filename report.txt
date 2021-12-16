@@ -1,0 +1,19 @@
+1)
+At the beginning, we had no idea on how to start. So we took a blank sheet of paper and we drew.
+First, it was a simple sketch with iot on a side and subscriber on the other. After we drew the broker in the center and 
+we added some elements one by one. This sketch make easier for us to separate the big project in a lot of subproject.
+So our implementation is for us the most intuitive: we launch a Broker, when the Broker received a new entrant connection,
+it creates a new Client. This Client will treat with Messages so it must be possible for it to Receive and Send some Message.
+To know which clients are interested by what, there are some Topic to wich it is possible to subscribe. Let us resume this 
+introduction with the list of our principal class.
+
+-Broker : the Broker class initializes all the class variable and accept connection and then delegate the new Client to the Client class.
+-Client : the Client class received a socket and divided in two the work: receive packet and send packet.
+-ReadderBroker : the ReadderBroker class is responsible of packet reception and packet creation
+-SenderBroker : the SenderBroker class have to send packet received or created by the ReaderBroker to interested Client.
+-Topic : the Topic class store the Client which are interested to a Topic.
+-Message : the Message class is our MQTT toolbox. Used to decode or compose MQTT packet.
+
+On the sketch you see a publish message on the position topic from an IoT to the Broker.
+
+2)
