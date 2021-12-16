@@ -8,13 +8,13 @@ import java.util.Map;
  */
 public class Topic {
     private static Map<String, Topic> dic = new HashMap<String, Topic>();
-    //private String name;
+    // private String name;
     private List<Client> clientLs;
 
-    private Topic(String name){
-        //this.name = name;
+    private Topic(String name) {
+        // this.name = name;
         this.clientLs = new ArrayList<>();
-        }
+    }
 
     public static void subscribe(String topicName, Client client) {
 
@@ -25,16 +25,15 @@ public class Topic {
     }
 
     public static void publish(String topicName, byte[] toPublish) {
-        if(dic.containsKey(topicName)){
-            List<Client>  list = dic.get(topicName).clientLs;
+        if (dic.containsKey(topicName)) {
+            List<Client> list = dic.get(topicName).clientLs;
             for (Client c : list)
                 c.queue.add(toPublish);
         }
     }
 
     public static void unSubscribe(String topic, Client client) {
-            if (dic.containsKey(topic))
-                dic.get(topic).clientLs.remove(client);   
+        if (dic.containsKey(topic))
+            dic.get(topic).clientLs.remove(client);
     }
 }
-

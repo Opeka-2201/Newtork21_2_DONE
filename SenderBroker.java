@@ -4,14 +4,14 @@ import java.io.IOException;
 /**
  * SenderBroker
  */
-public class SenderBroker implements Runnable{
+public class SenderBroker implements Runnable {
 
     OutputStream out;
     Client client;
     Boolean write;
 
     public SenderBroker(Client client) throws IOException {
-        
+
         this.client = client;
         this.out = this.client.s.getOutputStream();
         write = true;
@@ -20,7 +20,7 @@ public class SenderBroker implements Runnable{
     @Override
     public void run() {
         try {
-            while(write){    
+            while (write) {
                 byte[] msg = null;
                 try {
                     msg = this.client.queue.take();
@@ -28,14 +28,14 @@ public class SenderBroker implements Runnable{
                     e.printStackTrace();
                     System.exit(-1);
                 }
-                synchronized(this){
+                synchronized (this) {
                     this.out.write(msg);
                 }
             }
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(-1);
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     public void stop() {
