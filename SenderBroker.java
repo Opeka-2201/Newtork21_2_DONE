@@ -2,7 +2,12 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 /**
- * SenderBroker
+ * <h1>Sender Broker: send the message in the queue</h1>
+ * This class is quit simple. It's responsible to send the message in the Bloquing queue.
+ * So to send a message, just put it in the queue store in Client class
+ * 
+ * @author LOUIS Arthur
+ * @author Lambermont Romain
  */
 public class SenderBroker implements Runnable {
 
@@ -10,6 +15,11 @@ public class SenderBroker implements Runnable {
     Client client;
     Boolean write;
 
+    /**
+     * Constructor for Sender Broker Object. All informations needed is store in Client.
+     * @param client
+     * @throws IOException
+     */
     public SenderBroker(Client client) throws IOException {
 
         this.client = client;
@@ -21,15 +31,15 @@ public class SenderBroker implements Runnable {
     public void run() {
         try {
             while (write) {
-                byte[] msg = null;
+                byte[] msg;
                 try {
                     msg = this.client.queue.take();
+                    synchronized (this) {
+                        this.out.write(msg);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     System.exit(-1);
-                }
-                synchronized (this) {
-                    this.out.write(msg);
                 }
             }
         } catch (IOException e) {
@@ -38,6 +48,9 @@ public class SenderBroker implements Runnable {
         }
     }
 
+    /**
+     * This function is responsible to stop sending and interrupt the Thread
+     */
     public void stop() {
         this.write = false;
         Thread.currentThread().interrupt();
