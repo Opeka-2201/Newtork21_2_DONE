@@ -3,18 +3,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
- * <h1>Message class: method used to decode and creat message</h1>
+ * <h1>Message class: class used to decode and creat message</h1>
  * This class contains only static method. It is very usefull to create Message
  * or to extract some elements in a MQTT byte array.
  * 
- * @author LOUISArthur
- * @author Lambermont Romain
+ * @author LOUIS Arthur
+ * @author LAMBERMONT Romain
  */
 public class Message {
 
-
     /**
      * This function return the type of a MQTT message
+     * 
      * @param b A total MQTT packet byte array
      * @return MQTT Type as an int
      */
@@ -25,6 +25,7 @@ public class Message {
 
     /**
      * Check if a MQTT CONNECT packet is legal
+     * 
      * @param packet
      * @return a boolean : true if legal, false if not
      */
@@ -37,8 +38,9 @@ public class Message {
 
     /**
      * Return the Keep Alive parameter of an MQTT CONNECT Packet.
+     * 
      * @param packet A MQTT CONNECT Packet
-     * @return  the Keep Alive parameter in second.
+     * @return the Keep Alive parameter in second.
      */
     public static int getKeepAlive(byte[] packet) {
         return (int) packet[10] * (2 ^ 8) + (int) packet[11];
@@ -81,8 +83,10 @@ public class Message {
 
     /**
      * Use the MQTT 3.1.1 convension to convert a byte array in String
+     * 
      * @param packet A MQTT packet (byte array)
-     * @param offset Index of the first byte of the string wich means the MSB length (int)
+     * @param offset Index of the first byte of the string wich means the MSB length
+     *               (int)
      * @return a String
      */
     public static String decodeString(byte[] packet, int offset) {
@@ -92,7 +96,8 @@ public class Message {
 
     /**
      * Create a CONNACK MQTT packet.
-     * @param sp session present flag (int)
+     * 
+     * @param sp         session present flag (int)
      * @param returnCode return code(int): failure(128) or QoS
      * @return a byte array ready to be send
      */
@@ -107,6 +112,7 @@ public class Message {
 
     /**
      * Extract the topic of a PUBLISH MQTT packet
+     * 
      * @param packet (byte array)
      * @return a String
      */
@@ -116,6 +122,7 @@ public class Message {
 
     /**
      * Exctract the SubscribeID of a SUBRSCIBE MQTT packet
+     * 
      * @param packet (byte array)
      * @return a byte array of size 2. toReturn[0]=MSB, toReturn[1]=LSB
      */
@@ -130,8 +137,10 @@ public class Message {
 
     /**
      * Exctract all the topic present in a SUBSCRIBE MQTT packet
+     * 
      * @param packet (byte array)
-     * @return a String array. toReturn[0]=first topic, toReturn[1]=second topic, ...
+     * @return a String array. toReturn[0]=first topic, toReturn[1]=second topic,
+     *         ...
      */
     public static String[] decodeSubscribe(byte[] packet) {
         int[] rm = getRemainingLength(packet);
@@ -166,7 +175,8 @@ public class Message {
      * Extract all the QoS byte relative to each Topic of a SUBSCRIBE MQTT packet
      * 
      * @param packet (byte array)
-     * @return an int array. toReturn[0]=QoS of first Topic, toReturn[1]=QoS of second topic, ...
+     * @return an int array. toReturn[0]=QoS of first Topic, toReturn[1]=QoS of
+     *         second topic, ...
      */
     public static int[] getQoS(byte[] packet) {
         int[] rm = getRemainingLength(packet);
@@ -196,8 +206,11 @@ public class Message {
 
     /**
      * Create a SUBACK MQTT packet
-     * @param subId corresponding to the SubscribeID of the correspondant SUBSCRIBE MQTT packet(int)
-     * @param QosReturnCode all the QoSReturnCode corresponding to each  topic of the SUBSCRIBE MQTT packet (int array)
+     * 
+     * @param subId         corresponding to the SubscribeID of the correspondant
+     *                      SUBSCRIBE MQTT packet(int)
+     * @param QosReturnCode all the QoSReturnCode corresponding to each topic of the
+     *                      SUBSCRIBE MQTT packet (int array)
      * @return a byte array. Ready to be send
      */
     public static byte[] createSuback(byte[] subId, int[] QosReturnCode) {
@@ -214,6 +227,7 @@ public class Message {
 
     /**
      * Create a PINGRESP MQTT packet
+     * 
      * @return a byte array. Ready to be send
      */
     public static byte[] createPingResp() {

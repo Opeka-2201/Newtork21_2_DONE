@@ -20,17 +20,18 @@ public class ReaderBroker implements Runnable {
     Boolean read;
     InputStream in;
     byte[] stream;
-    String name ;
+    String name;
     ArrayList<String> topicLs;
 
     /**
      * This is the constructor, of the class.
-     * All the principal informations are already in Client class so we just need the Client. 
+     * All the principal informations are already in Client class so we just need
+     * the Client.
+     * 
      * @param client corresponding to connected client
      */
-    public ReaderBroker(Client client){
-        
-        
+    public ReaderBroker(Client client) {
+
         this.client = client;
         this.read = true;
         try {
@@ -46,16 +47,16 @@ public class ReaderBroker implements Runnable {
     @Override
     public void run() {
         try {
-			this.client.s.setTcpNoDelay(true); //To send immediatly TCP packet
+            this.client.s.setTcpNoDelay(true); // To send immediatly TCP packet
             int type;
             String topic;
             String[] topicArray;
             byte[] packet;
-            while(read){
+            while (read) {
                 packet = read();
                 type = Message.getType(packet);
                 switch (type) {
-                    case 1: //CONNECT case
+                    case 1: // CONNECT case
                         if (!Message.checkConnect(packet))
                             throw new MessageException("CONNECT malfomed");
                         this.client.s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
@@ -63,44 +64,43 @@ public class ReaderBroker implements Runnable {
                         this.client.queue.add(Message.createConnack(1, 0));
                         break;
 
-                    case 3: //PUBLISH case
+                    case 3: // PUBLISH case
                         topic = Message.getTopic(packet);
                         Topic.publish(topic, packet);
                         break;
 
-                    
-                    case 8: //SUBSCRIBE case
+                    case 8: // SUBSCRIBE case
                         byte[] subId = Message.getSubscribeID(packet);
                         topicArray = Message.decodeSubscribe(packet);
-                        int [] listQoS = Message.getQoS(packet);
-                        for (String c : topicArray){
+                        int[] listQoS = Message.getQoS(packet);
+                        for (String c : topicArray) {
                             if (!this.topicLs.contains(c))
                                 this.topicLs.add(c);
-                            Topic.subscribe(c,this.client);
+                            Topic.subscribe(c, this.client);
                         }
-                        this.client.queue.add(Message.createSuback(subId,listQoS));
+                        this.client.queue.add(Message.createSuback(subId, listQoS));
                         break;
-                    
-                    case 12: //PINGREQ case
+
+                    case 12: // PINGREQ case
                         this.client.queue.add(Message.createPingResp());
 
-                    case 14: //DISCONNECT case
-                        for (String c : this.topicLs){ //Unsubscribe the client of all topic precendently follow
+                    case 14: // DISCONNECT case
+                        for (String c : this.topicLs) { // Unsubscribe the client of all topic precendently follow
                             Topic.unSubscribe(c, this.client);
                             this.topicLs.remove(c);
                         }
                         this.client.stop();
-                        
+
                         break;
                     default:
                         break;
                 }
             }
-            
-		} catch (SocketException e) {
-			e.printStackTrace();
+
+        } catch (SocketException e) {
+            e.printStackTrace();
             this.client.stop();
-		}catch (MessageException e) {
+        } catch (MessageException e) {
             e.printStackTrace();
             System.exit(-1);
         }
@@ -108,11 +108,12 @@ public class ReaderBroker implements Runnable {
     }
 
     /**
-     * Read is responsible to read an entire MQTT packet. Even if the packet is in two TCP stream.
+     * Read is responsible to read an entire MQTT packet. Even if the packet is in
+     * two TCP stream.
+     * 
      * @return a byte array only composed by the MQTT message.
      */
-    public byte[] read()
-    {  
+    public byte[] read() {
         int[] rm;
         int msgLength;
         byte[] packet = null;
@@ -124,11 +125,11 @@ public class ReaderBroker implements Runnable {
             rm = Message.getRemainingLength(this.stream);
             msgLength = rm[0] + rm[1] + 1;
             packet = new byte[msgLength];
-            while (!end){
-                for(int i = 0; i < received ; i++)
-                    packet[writed+ i] = this.stream[i];
+            while (!end) {
+                for (int i = 0; i < received; i++)
+                    packet[writed + i] = this.stream[i];
                 writed += received;
-                if (msgLength == writed)
+                if (msgLength == writed) // True only if the whole message was readed
                     end = true;
                 else
                     received = this.in.read(this.stream);
@@ -139,7 +140,7 @@ public class ReaderBroker implements Runnable {
         }
         return packet;
     }
-    
+
     /**
      * This function is responsible to stop reading and interrupt the Thread
      */

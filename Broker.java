@@ -10,18 +10,20 @@ import java.util.concurrent.Executors;
  * This class init all class variables we need for the rest of the program
  * In this we accept socket connection and we delegate the work in the client
  * class
+ * 
+ * <p>
  * use "java Broker 2xxx" to lanch the broker (xxx is a number)
+ * </p>
  * 
  * @author LOUIS Arthur
  * @author LAMBERMONT Romain
  */
-
 public class Broker {
 
     public static void main(String[] args) {
 
         boolean play = true;
-        if (args.length != 1) {  //collect and check argument
+        if (args.length != 1) { // collect and check argument
             System.out.println("Broker expects : $ java Broker 2xxx (where xxx is a number in range : 2000 -> 2999)");
             System.exit(-1);
         }
@@ -42,21 +44,21 @@ public class Broker {
 
         ServerSocket server = null;
 
-        try {  //instanciate the server socket
+        try { // instanciate the server socket
             server = new ServerSocket(serverPort);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        ExecutorService writingPool = Executors.newFixedThreadPool(1000); //threadPool for writting thread
-        ExecutorService readingPool = Executors.newFixedThreadPool(1000); //threadPool for reading thread
-        Client.init(writingPool, readingPool);
-        System.out.println("Broker ready");
+        ExecutorService writingPool = Executors.newFixedThreadPool(1000); // threadPool for writting thread
+        ExecutorService readingPool = Executors.newFixedThreadPool(1000); // threadPool for reading thread
+        Client.init(writingPool, readingPool);// send the 2 threadPools to class Client
+        System.out.println("Broker ready ..");
 
-        while (play) {  //accept every new client
+        while (play) { // accept every new client
             try {
-                Socket next = server.accept();  
-                new Client(next);  //All the method specific to one Client are delegated with the Client class
+                Socket next = server.accept();
+                new Client(next); // All the method specific to one Client are delegated with the Client class
             } catch (IOException e) {
                 e.printStackTrace();
                 play = false;
