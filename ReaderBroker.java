@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class ReaderBroker implements Runnable {
 
     Client client;
+    Boolean read;
     InputStream in;
     byte[] stream;
     String name ;
@@ -21,6 +22,7 @@ public class ReaderBroker implements Runnable {
         
         
         this.client = client;
+        this.read = true;
         this.in = this.client.s.getInputStream();
         this.stream = new byte[2000];
         this.topicLs = new ArrayList<>();
@@ -34,13 +36,13 @@ public class ReaderBroker implements Runnable {
             String topic;
             String[] topicArray = null;
             byte[] packet= null;
-            while(true){
+            while(read){
                 packet = read();
                 type = Message.getType(packet);
                 switch (type) {
                     case 1:
                         if (!Message.checkConnect(packet))
-                            System.out.println("C est casse"); // TODO
+                            throw new MessageException("Connect malfomed");
                         this.client.s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
                         this.name = Message.decodeString(packet, 12);
                         this.client.queue.add(Message.createConnack(1, 0));
@@ -83,7 +85,11 @@ public class ReaderBroker implements Runnable {
 		} catch (SocketException e) {
 			e.printStackTrace();
             this.client.stop();
-		}        
+		}catch (MessageException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
     }
 
     public byte[] read()
@@ -109,13 +115,14 @@ public class ReaderBroker implements Runnable {
                     received = this.in.read(this.stream);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            System.exit(-1);
         }
         return packet;
     }
 
     public void stop() {
+        this.read = false;
         Thread.currentThread().interrupt();
     }
 }

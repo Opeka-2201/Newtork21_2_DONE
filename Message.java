@@ -17,29 +17,29 @@ public class Message {
     public static int getKeepAlive(byte[] packet) {return (int)packet[10]*(2^8)+(int)packet[11];}
 
     static public int[] getRemainingLength(byte[] message, int offset) {
-        // Returns the remaining length and the number of bytes used to store it
-        // rem_length[0] = remaining length
-        // rem_length[1] = number of bytes to store it
-        //TODO changer cette ptn de fonction sinon plagiat
         int multiplier = 1;
-        int value = 0;
+        int length = 0;
         int i = 1;
-        int[] rem_length = new int[2];
-        Byte encodedByte = null;
-        do {
-            encodedByte = message[i+offset];
-            i += 1;
-            value += (encodedByte & (byte) 127) * multiplier;
-            if (multiplier > 128 * 128 * 128) {
-                System.out.println("Malformed remaining length. Disconnecting...");
-                return null;
-            }
-            multiplier *= 128;
+        int[] rm = new int[2];
+        Byte encodedByte;
+        try {
+                do {
+                encodedByte = message[i+offset];
+                i += 1;
+                length += (encodedByte & (byte) 127) * multiplier;
+                if (multiplier > 128 * 128 * 128) {
+                    throw new MessageException("Not valid Remaining Length");
+                }
+                multiplier *= 128;
 
-        } while ((encodedByte & (byte) 128) != 0);
-        rem_length[0] = value;
-        rem_length[1] = i - 1;
-        return rem_length;
+            } while ((encodedByte & (byte) 128) != 0);
+        } catch(MessageException e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        rm[0] = length;
+        rm[1] = i - 1;
+        return rm;
     }
 
     public static String decodeString(byte[] packet, int offset) {
@@ -73,16 +73,22 @@ public class Message {
         int length;
         String s;
         ArrayList<String> ls = new ArrayList<>();
-        while (i<rm[0]+rm[1]){
-            length = packet[i]*128 + packet[i+1];
-            i += 2;
-            s = new String(packet,i,length,StandardCharsets.UTF_8);
-            ls.add(s);
-            i += length;
-            //if (!((int)packet[i] == 0|| (int)packet[i]==1 || (int)packet[i]==2))
-                //throw new MalformedMessageError(); //TODO
-            i += 1;
+        try{
+            while (i<rm[0]+rm[1]){
+                length = packet[i]*128 + packet[i+1];
+                i += 2;
+                s = new String(packet,i,length,StandardCharsets.UTF_8);
+                ls.add(s);
+                i += length;
+                if (!((int)packet[i] == 0|| (int)packet[i]==1 || (int)packet[i]==2))
+                    throw new MessageException("QoS error in Subscribe");
+                i += 1;
+            }
+        } catch (MessageException e){
+            e.printStackTrace();
+            System.exit(-1);
         }
+        
         String[] toReturn = new String[ls.size()];
         for (i = 0; i<ls.size();i++){
             toReturn[i] = ls.get(i);
@@ -95,14 +101,19 @@ public class Message {
         int i = rm[1] + 3;
         int length;
         ArrayList<Integer> ls = new ArrayList<>();
-        while (i < rm[0] + rm[1]) {
-            length = packet[i] * 128 + packet[i + 1];
-            i += 2;
-            i += length;
-            // if (!((int)packet[i] == 0|| (int)packet[i]==1 || (int)packet[i]==2))
-            // throw new MalformedMessageError(); //TODO
-            ls.add((int)packet[i]);
-            i += 1;
+        try{
+            while (i < rm[0] + rm[1]) {
+                length = packet[i] * 128 + packet[i + 1];
+                i += 2;
+                i += length;
+                if (!((int)packet[i] == 0|| (int)packet[i]==1 || (int)packet[i]==2))
+                throw new MessageException("QoS error in Subscribe");
+                ls.add((int)packet[i]);
+                i += 1;
+            }
+        } catch (MessageException e){
+            e.printStackTrace();
+            System.exit(-1);
         }
         int[] toReturn = new int[ls.size()];
         for (i = 0; i < ls.size(); i++) {
