@@ -1,6 +1,6 @@
 *.class
-.DS_Store
-.DS_Store?
+*.DS_Store
+*.DS_Store?
 Pcap/
 *.zip
 *.tar.gz
