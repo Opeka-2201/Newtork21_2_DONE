@@ -21,9 +21,9 @@ public class Topic {
      * 
      * @param name , of the topic (String)
      */
-    private Topic(String name){
+    private Topic(String name) {
         this.clientLs = new ArrayList<>();
-        }
+    }
 
     /**
      * Add client to the list of subriber of the topic
@@ -48,8 +48,8 @@ public class Topic {
      * @param packet    to send
      */
     public static void publish(String topicName, byte[] toPublish) {
-        if(dic.containsKey(topicName)){
-            List<Client>  list = dic.get(topicName).clientLs;
+        if (dic.containsKey(topicName)) {
+            List<Client> list = dic.get(topicName).clientLs;
             for (Client c : list)
                 c.queue.add(toPublish);
         }
@@ -62,8 +62,7 @@ public class Topic {
      * @param topic  to unsubscribe
      */
     public static void unSubscribe(String topic, Client client) {
-            if (dic.containsKey(topic))
-                dic.get(topic).clientLs.remove(client);   
+        if (dic.containsKey(topic))
+            dic.get(topic).clientLs.remove(client);
     }
 }
-

@@ -19,17 +19,17 @@ import java.util.concurrent.Executors;
  */
 public class Broker {
     public static void main(String[] args) {
-       boolean play = true;
+        boolean play = true;
         if (args.length != 1) {// collect and check argument
             System.out.println("Broker expects : $ java Broker 2xxx (where xxx is a number in range : 2000 -> 2999)");
             System.exit(-1);
         }
-        
-        int serverPort = 0; 
+
+        int serverPort = 0;
 
         try {
             serverPort = Integer.parseInt(args[0]);
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             e.printStackTrace();
             System.exit(-1);
         }
@@ -38,7 +38,7 @@ public class Broker {
             System.out.println("Please refer to project statement : range of ports is 2000 -> 2999");
             System.exit(-1);
         }
-        
+
         ServerSocket server = null;
 
         try {// instanciate the server socket
@@ -46,10 +46,10 @@ public class Broker {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         ExecutorService writingPool = Executors.newFixedThreadPool(1000);// threadPool for writting thread
         ExecutorService readingPool = Executors.newFixedThreadPool(1000);// threadPool for reading thread
-        Client.init(writingPool,readingPool);// send the 2 threadPools to class Client
+        Client.init(writingPool, readingPool);// send the 2 threadPools to class Client
         System.out.println("Broker ready");
 
         while (play) {// accept every new client
