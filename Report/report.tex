@@ -86,19 +86,17 @@ what class we have used and for what purpose. We'll then reflect on MQTT quality
 to implement new features in our MQTT management.
 
 \section{Software architecture}
-When starting our project, we had no idea of how to implement the Broker, so we began to sketch our architecture, 
-representing the Broker, IoTs sensors and Subscriber. We then started to add our classes one by one to make everything communicate. 
-The sketch made it easier to implement everything we wanted and what we should do in each class to make the Game run on the Subscribers. 
+When starting our project, we had no idea of how to implement the Broker, so we began to sketch our architecture, representing the Broker, IoTs sensors and Subscriber. 
+We then started to add our classes one by one to make everything communicate. The sketch made it easier to implement everything we wanted and what we should do in each class to make the Game run on the Subscribers. 
 The architecture is as follows, to start we launch a \textbf{Broker}, when a new connection enters, it creates a new \textbf{Client} and we handle it 
 with \textbf{Messages} that we can \textbf{Receive} and \textbf{Send}. To remember what a client is interested about, there are \textbf{Topics} a client 
 can subscribe to.
-\\\\
-
+\paragraph{}
 Here is the final sketch of our implementation : 
 
 \begin{figure}[!h]
 	\centering
-	\includegraphics[scale = 0.22]{PublishMessage.jpg}
+
 	\caption{Publish message handeld by our implementation}
 \end{figure}
 
