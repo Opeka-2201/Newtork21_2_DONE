@@ -16,4 +16,10 @@ introduction with the list of our principal class.
 
 On the sketch you see a publish message on the position topic from an IoT to the Broker.
 
-2)
+2) TCP ensures that in a connection, there is no loos or alteration of a packet. However if this connection is broken (with a crash of server or a restart
+of the client system for example) a totally new TCP is created. So without QoS 1, the conversation between client and broker woulb be restart from zero. Thank's
+to QoS 1, this liaison can just continue as if nothing hab append. 
+
+3) This implementation is the simplest MQTT Broker possible. There is no Persistant Session and no Quality of Service 1 and 2. 
+However, this Broker works only in local host so the risk of loos or deformation of packets is almost zero. The implementation
+mentionned above will be necessary if the broker is used on a different network of the Subscribers and/or the IoT's.
