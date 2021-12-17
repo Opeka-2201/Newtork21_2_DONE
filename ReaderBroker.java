@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * This class is responsible of reading MQTT packet. It is also responsible of
  * creation a response
  * There is a thread of this class for each client.
- * 
+ *
  * @author LOUIS Arthur
  * @author LAMBERMONT Romain
  */
@@ -31,7 +31,7 @@ public class ReaderBroker implements Runnable {
      * This is the constructor, of the class.
      * All the principal informations are already in Client class so we just need
      * the Client.
-     * 
+     *
      * @param client corresponding to connected client
      */
     public ReaderBroker(Client client) throws IOException {
@@ -58,7 +58,7 @@ public class ReaderBroker implements Runnable {
                     case 1:// CONNECT case
                         if (!Message.checkConnect(packet))
                             throw new MessageException("Connect malfomed");
-                        this.client.s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
+                        this.client.s.setSoTimeout(Message.getKeepAlive(packet) * 1500);
                         this.name = Message.decodeString(packet, 12);
                         this.client.queue.add(Message.createConnack(1, 0));
                         break;
@@ -109,7 +109,7 @@ public class ReaderBroker implements Runnable {
     /**
      * Read is responsible to read an entire MQTT packet. Even if the packet is in
      * two TCP stream.
-     * 
+     *
      * @return a byte array only composed by the MQTT message.
      */
     public byte[] read() {
