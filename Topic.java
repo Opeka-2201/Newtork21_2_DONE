@@ -13,7 +13,7 @@ import java.util.Map;
  * @author LAMBERMONT Romain
  */
 public class Topic {
-    private static Map<String, Topic> dic = new HashMap<String, Topic>();// store a topic with its name as key.
+    private static Map<String, Topic> dic = new HashMap<String, Topic>();
     private List<Client> clientLs;
 
     /**
@@ -21,9 +21,9 @@ public class Topic {
      * 
      * @param name , of the topic (String)
      */
-    private Topic(String name) {
+    private Topic(String name){
         this.clientLs = new ArrayList<>();
-    }
+        }
 
     /**
      * Add client to the list of subriber of the topic
@@ -47,11 +47,11 @@ public class Topic {
      * @param topicName received in a PUBLISH MQTT packet
      * @param packet    to send
      */
-    public static void publish(String topicName, byte[] packet) {
-        if (dic.containsKey(topicName)) {
-            List<Client> list = dic.get(topicName).clientLs;
+    public static void publish(String topicName, byte[] toPublish) {
+        if(dic.containsKey(topicName)){
+            List<Client>  list = dic.get(topicName).clientLs;
             for (Client c : list)
-                c.queue.add(packet);
+                c.queue.add(toPublish);
         }
     }
 
@@ -62,6 +62,8 @@ public class Topic {
      * @param topic  to unsubscribe
      */
     public static void unSubscribe(String topic, Client client) {
-        dic.get(topic).clientLs.remove(client);
+            if (dic.containsKey(topic))
+                dic.get(topic).clientLs.remove(client);   
     }
 }
+
