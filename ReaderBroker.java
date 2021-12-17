@@ -58,7 +58,7 @@ public class ReaderBroker implements Runnable {
                 switch (type) {
                     case 1: // CONNECT case
                         if (!Message.checkConnect(packet))
-                            throw new MessageException("CONNECT malfomed");
+                            throw new MessageException("CONNECT malformed");
                         this.client.s.setSoTimeout(Message.getKeepAlive(packet) * 1000);
                         this.name = Message.decodeString(packet, 12);
                         this.client.queue.add(Message.createConnack(1, 0));
