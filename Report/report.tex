@@ -114,13 +114,13 @@ To conclude this first section, here is a reminder of our classes :
 \section{Reflection on MQTT's quality of service}
 MQTT uses TCP/IP as the protocol to exchange packets and in TCP, there's no loss or alteration of the transmitted data. However, if the TCP connection 
 closes (e.g crash or client restart) a totally new TCP connection needs to be created. Without QoS 1 (at least once delivery, using PUBACK), in case of a crash of a connection, 
-the conversation between server and client would need to restart from zero but in the case of a MQTT QoS 1, the conversation can keep on as if nothing happend. But we have to be careful using QoS 1 because 
+the conversation between server and client would need to restart from zero but in the case of a MQTT QoS 1 (and Persistant Session), the conversation can keep on as if nothing happend. But we have to be careful using QoS 1 because 
 the implemantation needs to be able to handle duplicates (those can be harmful for the Subscribers). With QoS 2, we again improve the implemantation by guaranteeing the transmit of a packet with no duplicates (by using PUBREC, PUBREL, PUBCOMP). 
 This QoS 2 feature is great for an implementation that can keep the conversation on in case of crash while being careful of duplicates.
 
 \section{Limits \& Possible Improvements}
 In this implementation, we created the simplest MQTT Broker possible. Indeed, there's no advanced features that are available in MQTT protocol, namely, Persistant Session, 
-Retained Messages and the Last Will and Testament (our Broker is only QoS 0). However, this Broker is only used locally (localhost), so the risk of loss or deformation in packets is almost zero. 
+Retained Messages and the Last Will and Testament (our Broker is only QoS 0). However, this Broker is only used locally (localhost), so the risk of loss connection is almost zero. 
 The more advanced features mentionned above would be necessary if our Broker was used online or with a different IoTs/Subscribers structure. 
 % ==============================================================================
 
